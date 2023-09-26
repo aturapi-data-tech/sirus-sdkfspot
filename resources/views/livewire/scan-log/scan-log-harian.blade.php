@@ -64,36 +64,15 @@
 
             </div>
 
-            {{-- Dropdown --}}
-            <x-dropdown align="right" :width="__('48')">
-                <x-slot name="trigger">
-                    {{-- Button Dropdown Menu --}}
-                    <x-primary-button class="inline-flex">
-                        <svg class="-ml-1 mr-1.5 w-5 h-5" fill="currentColor" viewbox="0 0 20 20"
-                            xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                            <path clip-rule="evenodd" fill-rule="evenodd"
-                                d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
-                        </svg>
-                        ({{ 'Tampil_1' }})
-                    </x-primary-button>
-                </x-slot>
-                {{-- Open Dropdown Menu --}}
-                <x-slot name="content">
+            <div>
+                <x-primary-button class="ml-2" wire:click='userProses()' wire:loading.remove>
+                    {{ 'User' }}
+                </x-primary-button>
 
-                    <x-dropdown-link>
-                        {{ __(1) }}
-                    </x-dropdown-link>
-                    <x-dropdown-link>
-                        {{ __(2) }}
-                    </x-dropdown-link>
-                    <x-dropdown-link>
-                        {{ __(3) }}
-                    </x-dropdown-link>
-                </x-slot>
-            </x-dropdown>
-            {{-- Dropdown --}}
-
-
+                <div wire:loading wire:target="userProses">
+                    <x-loading />
+                </div>
+            </div>
 
         </div>
         {{-- Top Bar --}}
@@ -112,13 +91,16 @@
                             NIK
                         </th>
                         <th scope="col" class="w-1/4 px-4 py-3 ">
+                            Nama
+                        </th>
+                        <th scope="col" class="w-1/4 px-4 py-3 ">
+                            Jabatan
+                        </th>
+                        <th scope="col" class="w-1/4 px-4 py-3 ">
+                            Keterangan
+                        </th>
+                        <th scope="col" class="w-1/4 px-4 py-3 ">
                             Jam Hadir
-                        </th>
-                        <th scope="col" class="w-1/4 px-4 py-3 ">
-                            Status
-                        </th>
-                        <th scope="col" class="w-1/4 px-4 py-3 ">
-                            Tanggal
                         </th>
                     </tr>
                 </thead>
@@ -131,13 +113,16 @@
                                 {{ $myQData->emp_id }}
                             </td>
                             <td class="px-4 py-2">
-                                {{ $myQData->at_hour }}
+                                {{ $myQData->emp_name }}
                             </td>
                             <td class="px-4 py-2">
-                                {{ $myQData->at_mode }}
+                                {{ $myQData->emp_jabatan }}
                             </td>
                             <td class="px-4 py-2">
-                                {{ $myQData->at_date }}
+                                {{ $myQData->emp_keterangan }}
+                            </td>
+                            <td class="px-4 py-2">
+                                {{ $myQData->at_hour_i }}
                             </td>
                         </tr>
                     @endforeach

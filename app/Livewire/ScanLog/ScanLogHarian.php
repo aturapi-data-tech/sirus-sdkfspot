@@ -84,6 +84,44 @@ class ScanLogHarian extends Component
             );
     }
 
+    // scanLogProses
+    public function userProses()
+    {
+        //get table oracle local
+        DB::table('tb_user')->select('pin')
+            ->whereNotIn('pin', function ($q) {
+                $q->select('emp_id')->from('abmst_employers');
+            })
+            ->get()
+            ->each(
+                function ($item) {
+
+                    // dd($item);
+                    //cek record oracle RS // if exist update else insert
+                    $cekrec = DB::table('abmst_employers')
+                        ->where('emp_id', $item->pin)
+                        ->first();
+
+                    if ($cekrec) {
+                        // update
+                        DB::table('abmst_employers')
+                            ->where('emp_id', $item->pin)
+                            ->update([
+                                'emp_id' => $item->pin,
+                                'po_id' => '13',
+                            ]);
+                    } else {
+                        // insert
+                        DB::table('abmst_employers')
+                            ->insert([
+                                'emp_id' => $item->pin,
+                                'po_id' => '13',
+                            ]);
+                    }
+                }
+            );
+    }
+
     public function mount()
     {
         // Set TopBar
@@ -96,26 +134,32 @@ class ScanLogHarian extends Component
         $mySearch = $this->myTopBar['refSearch'];
         $myRefdate = $this->myTopBar['refDate'];
         // myQuery  /Collection
-        $myQueryData = DB::table('abtxn_attendancexts')
+        $myQueryData = DB::table('abview_cekins')
             ->select(
-                'at_hour',
-                'at_date',
+                'at_hour_i',
+                'at_date_i',
                 'at_mode',
-                'at_month',
-                'at_year',
                 'emp_id',
+                'emp_name',
+                'emp_jabatan',
+                'emp_keterangan',
             )
-            ->where(DB::raw('upper(emp_id)'), 'like', '%' . strtoupper($mySearch) . '%')
-            ->where(DB::raw("to_char(to_date(at_date,'yyyy-mm-dd hh24:mi:ss'),'dd/mm/yyyy')"), '=', $myRefdate)
-            ->where('at_mode', '=', '1')
-            ->orderBy('emp_id', 'asc')
-            ->paginate(100);
+            ->where(DB::raw("to_char(at_date_i,'dd/mm/yyyy')"), '=', $myRefdate);
+
+        $myQueryData->where(function ($q) use ($mySearch) {
+            $q->orWhere(DB::raw('upper(emp_id)'), 'like', '%' . strtoupper($mySearch) . '%')
+                ->orWhere(DB::raw('upper(emp_name)'), 'like', '%' . strtoupper($mySearch) . '%')
+                ->orWhere(DB::raw('upper(emp_jabatan)'), 'like', '%' . strtoupper($mySearch) . '%')
+                ->orWhere(DB::raw('upper(emp_keterangan)'), 'like', '%' . strtoupper($mySearch) . '%');
+        })
+
+            ->orderBy('emp_id', 'asc');
         // myQuery
 
 
         return view(
             'livewire.scan-log.scan-log-harian',
-            ['myQueryData' => $myQueryData]
+            ['myQueryData' => $myQueryData->paginate(100)]
         );
     }
 }
