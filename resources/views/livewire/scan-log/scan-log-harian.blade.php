@@ -65,11 +65,19 @@
             </div>
 
             <div>
-                <x-primary-button class="ml-2" wire:click='userProses()' wire:loading.remove>
+                {{-- <x-primary-button class="ml-2" wire:click='userProses()' wire:loading.remove>
                     {{ 'User' }}
                 </x-primary-button>
 
                 <div wire:loading wire:target="userProses">
+                    <x-loading />
+                </div> --}}
+
+                <x-primary-button class="ml-2" wire:click='getDevInfoMachine()' wire:loading.remove>
+                    {{ 'DevieInfo' }}
+                </x-primary-button>
+
+                <div wire:loading wire:target="getDevInfoMachine">
                     <x-loading />
                 </div>
             </div>
