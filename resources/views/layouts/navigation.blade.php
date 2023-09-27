@@ -12,12 +12,22 @@
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
-                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
                         {{ __('Dashboard') }}
                     </x-nav-link>
                 </div>
                 <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
-                    <x-nav-link :href="route('ScanLogHarian')" :active="request()->routeIs('ScanLogHarian')">
+                    <x-nav-link :href="route('ScanLogHarianIn')" :active="request()->routeIs('ScanLogHarianIn')" wire:navigate>
+                        {{ __('Scan Log Harian Masuk') }}
+                    </x-nav-link>
+                </div>
+                <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
+                    <x-nav-link :href="route('ScanLogHarianOut')" :active="request()->routeIs('ScanLogHarianOut')" wire:navigate>
+                        {{ __('Scan Log Harian Pulang') }}
+                    </x-nav-link>
+                </div>
+                <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
+                    <x-nav-link :href="route('ScanLogHarianInOut')" :active="request()->routeIs('ScanLogHarianInOut')" wire:navigate>
                         {{ __('Scan Log Harian') }}
                     </x-nav-link>
                 </div>

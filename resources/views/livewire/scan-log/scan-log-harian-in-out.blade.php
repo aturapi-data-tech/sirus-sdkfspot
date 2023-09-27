@@ -19,7 +19,7 @@
 
             <div class="flex w-full">
                 {{-- Cari Data --}}
-                <div class="relative w-1/2 mr-2 pointer-events-auto">
+                <div class="relative w-1/3 mr-2 pointer-events-auto">
                     <div class="absolute inset-y-0 left-0 flex items-center p-5 pl-3 pointer-events-none ">
                         <svg width="24" height="24" fill="none" aria-hidden="true" class="flex-none mr-3 ">
                             <path d="m19 19-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -35,7 +35,7 @@
                 {{-- Cari Data --}}
 
                 {{-- Tanggal --}}
-                <div class="relative w-1/6">
+                <div class="relative w-1/6 mr-2">
                     <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                         <svg aria-hidden="true" class="w-5 h-5 text-gray-900 dark:text-gray-400" fill="currentColor"
                             viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -49,6 +49,21 @@
                         wire:model.live.debounce.2s="myTopBar.refDate" />
                 </div>
                 {{-- Tanggal --}}
+
+                {{-- Shift --}}
+                <div class="relative w-1/12">
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                        <svg class="w-5 h-5 text-gray-800 dark:text-white" aria-hidden="true"
+                            xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                                d="M1 5h1.424a3.228 3.228 0 0 0 6.152 0H19a1 1 0 1 0 0-2H8.576a3.228 3.228 0 0 0-6.152 0H1a1 1 0 1 0 0 2Zm18 4h-1.424a3.228 3.228 0 0 0-6.152 0H1a1 1 0 1 0 0 2h10.424a3.228 3.228 0 0 0 6.152 0H19a1 1 0 0 0 0-2Zm0 6H8.576a3.228 3.228 0 0 0-6.152 0H1a1 1 0 0 0 0 2h1.424a3.228 3.228 0 0 0 6.152 0H19a1 1 0 0 0 0-2Z" />
+                        </svg>
+                    </div>
+
+                    <x-text-input type="text" class="w-full p-2 pl-10 " placeholder="[Shift 1/2/3]"
+                        wire:model.live.debounce.2s="myTopBar.refShift" />
+                </div>
+                {{-- Shift --}}
 
                 <x-primary-button class="ml-2" wire:click='scanLogProses()' wire:loading.remove>
                     {{ 'ScanLog' }}
@@ -95,20 +110,29 @@
             <table class="w-full text-sm text-left text-gray-700 table-auto ">
                 <thead class="sticky top-0 text-xs text-gray-900 uppercase bg-gray-100">
                     <tr>
-                        <th scope="col" class="w-1/4 px-4 py-3 ">
+                        <th scope="col" class="w-1/6 px-4 py-3 ">
                             NIK
                         </th>
-                        <th scope="col" class="w-1/4 px-4 py-3 ">
+                        <th scope="col" class="w-1/6 px-4 py-3 ">
                             Nama
                         </th>
-                        <th scope="col" class="w-1/4 px-4 py-3 ">
-                            Jabatan
+                        <th scope="col" class="w-1/6 px-4 py-3 ">
+                            Jam Masuk
                         </th>
-                        <th scope="col" class="w-1/4 px-4 py-3 ">
-                            Keterangan
+                        <th scope="col" class="w-1/6 px-4 py-3 ">
+                            Jam Pulang
                         </th>
-                        <th scope="col" class="w-1/4 px-4 py-3 ">
-                            Jam Hadir
+                        {{-- <th scope="col" class="w-1/6 px-4 py-3 ">
+                            Masuk(Menit)
+                        </th> --}}
+                        <th scope="col" class="w-1/6 px-4 py-3 ">
+                            Telat Masuk(Menit)
+                        </th>
+                        {{-- <th scope="col" class="w-1/6 px-4 py-3 ">
+                            Pulang(Menit)
+                        </th> --}}
+                        <th scope="col" class="w-1/6 px-4 py-3 ">
+                            Cepat Pulang(Menit)
                         </th>
                     </tr>
                 </thead>
@@ -124,13 +148,22 @@
                                 {{ $myQData->emp_name }}
                             </td>
                             <td class="px-4 py-2">
-                                {{ $myQData->emp_jabatan }}
-                            </td>
-                            <td class="px-4 py-2">
-                                {{ $myQData->emp_keterangan }}
-                            </td>
-                            <td class="px-4 py-2">
                                 {{ $myQData->at_hour_i }}
+                            </td>
+                            <td class="px-4 py-2">
+                                {{ $myQData->at_hour_o }}
+                            </td>
+                            {{-- <td class="px-4 py-2">
+                                {{ $myQData->selisih_durasi_save_time }}
+                            </td> --}}
+                            <td class="px-4 py-2">
+                                {{ $myQData->selisih_durasi_terlambat }}
+                            </td>
+                            {{-- <td class="px-4 py-2">
+                                {{ $myQData->selisih_pulang_save_time }}
+                            </td> --}}
+                            <td class="px-4 py-2">
+                                {{ $myQData->selisih_pulang_terlambat }}
                             </td>
                         </tr>
                     @endforeach

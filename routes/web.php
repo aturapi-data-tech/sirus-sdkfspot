@@ -3,7 +3,10 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Livewire\Counter;
-use App\Livewire\ScanLog\ScanLogHarian;
+use App\Livewire\ScanLog\ScanLogHarianIn;
+use App\Livewire\ScanLog\ScanLogHarianOut;
+use App\Livewire\ScanLog\ScanLogHarianInOut;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -31,7 +34,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::get('ScanLogHarian', ScanLogHarian::class)->middleware('auth')->name('ScanLogHarian');
+Route::get('ScanLogHarianIn', ScanLogHarianIn::class)->middleware('auth')->name('ScanLogHarianIn');
+Route::get('ScanLogHarianOut', ScanLogHarianOut::class)->middleware('auth')->name('ScanLogHarianOut');
+Route::get('ScanLogHarianInOut', ScanLogHarianInOut::class)->middleware('auth')->name('ScanLogHarianInOut');
 
 
 require __DIR__ . '/auth.php';

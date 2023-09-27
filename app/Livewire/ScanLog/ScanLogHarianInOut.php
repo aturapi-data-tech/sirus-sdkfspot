@@ -12,7 +12,7 @@ use Carbon\Carbon;
 use Livewire\Component;
 
 
-class ScanLogHarian extends Component
+class ScanLogHarianInOut extends Component
 {
     use WithPagination;
 
@@ -24,6 +24,7 @@ class ScanLogHarian extends Component
     public array $myTopBar = [
         'refDate' => '',
         'refSearch' => '',
+        'refShift' => ''
     ];
 
 
@@ -88,6 +89,21 @@ class ScanLogHarian extends Component
     /////////////////////////////////////////
     ///////////////////////////////////////
 
+    // shift control
+    private function setShiftnCurrentDate(): void
+    {
+        // dd/mm/yyyy hh24:mi:ss
+        $this->myTopBar['refDate'] = Carbon::now()->format('d/m/Y');
+        // dd(Carbon::now()->format('H:i:s'));
+
+        // shift
+        $findShift = DB::table('rstxn_shiftctls')->select('shift')
+            ->whereRaw("'" . Carbon::now()->format('H:i:s') . "' between
+            shift_start and shift_end")
+            ->first();
+        $this->myTopBar['refShift'] = isset($findShift->shift) && $findShift->shift ? $findShift->shift : 3;
+    }
+
     // scanLogProses
     public function scanLogProses()
     {
@@ -110,7 +126,9 @@ class ScanLogHarian extends Component
             }
         }
 
-        // 3. Loop tb_scanlog memindahkan data ke -> (abtxn_attendancexts)
+        // 3. Loop tb_scanlog memindahkan data ke -> (abtxn_attendancexts) 
+        // --XXX celah ada pada scan_date bisa jadi ketika alat lebih dari 1 ada scan_date yang sama 
+        // dan data tidak terdeteksi   
         DB::table('tb_scanlog')->select('sn', 'scan_date', 'pin', 'verifymode', 'iomode', 'workcode')
             ->whereNotIn('scan_date', function ($q) {
                 $q->select('at_date')->from('abtxn_attendancexts');
@@ -157,10 +175,10 @@ class ScanLogHarian extends Component
             );
 
         // 4. hapus data tb_scanlog
-        // DB::table('tb_scanlog')->delete();
+        DB::table('tb_scanlog')->delete();
 
         // 5. hapus data mesin
-        // $this->delDataScanLogtoMachine();
+        $this->delDataScanLogtoMachine();
     }
 
     // scanLogProses
@@ -332,7 +350,7 @@ class ScanLogHarian extends Component
     public function mount()
     {
         // Set TopBar
-        $this->myTopBar['refDate'] = Carbon::now()->format('d/m/Y');
+        $this->setShiftnCurrentDate();
     }
 
     public function render()
@@ -340,24 +358,28 @@ class ScanLogHarian extends Component
         // set mySearch
         $mySearch = $this->myTopBar['refSearch'];
         $myRefdate = $this->myTopBar['refDate'];
+        $myRefshift = $this->myTopBar['refShift'];
+
         // myQuery  /Collection
-        $myQueryData = DB::table('abview_cekins')
+        $myQueryData = DB::table('abview_cekincekouts')
             ->select(
                 'at_hour_i',
+                'at_hour_o',
                 'at_date_i',
-                'at_mode',
+                DB::raw('ROUND(selisih_durasi_save_time * (24 * 60),0) as selisih_durasi_save_time'),
+                DB::raw('ROUND(selisih_durasi_terlambat * (24 * 60),0) as selisih_durasi_terlambat'),
+                DB::raw('ROUND(selisih_pulang_save_time * (24 * 60),0) as selisih_pulang_save_time'),
+                DB::raw('ROUND(selisih_pulang_terlambat * (24 * 60),0) as selisih_pulang_terlambat'),
                 'emp_id',
                 'emp_name',
-                'emp_jabatan',
-                'emp_keterangan',
+
             )
-            ->where(DB::raw("to_char(at_date_i,'dd/mm/yyyy')"), '=', $myRefdate);
+            ->where(DB::raw("to_char(at_date_i,'dd/mm/yyyy')"), '=', $myRefdate)
+            ->where("shift_id", '=', $myRefshift);
 
         $myQueryData->where(function ($q) use ($mySearch) {
             $q->orWhere(DB::raw('upper(emp_id)'), 'like', '%' . strtoupper($mySearch) . '%')
-                ->orWhere(DB::raw('upper(emp_name)'), 'like', '%' . strtoupper($mySearch) . '%')
-                ->orWhere(DB::raw('upper(emp_jabatan)'), 'like', '%' . strtoupper($mySearch) . '%')
-                ->orWhere(DB::raw('upper(emp_keterangan)'), 'like', '%' . strtoupper($mySearch) . '%');
+                ->orWhere(DB::raw('upper(emp_name)'), 'like', '%' . strtoupper($mySearch) . '%');
         })
 
             ->orderBy('emp_id', 'asc');
@@ -365,7 +387,7 @@ class ScanLogHarian extends Component
 
 
         return view(
-            'livewire.scan-log.scan-log-harian',
+            'livewire.scan-log.scan-log-harian-in-out',
             ['myQueryData' => $myQueryData->paginate(20)]
         );
     }
