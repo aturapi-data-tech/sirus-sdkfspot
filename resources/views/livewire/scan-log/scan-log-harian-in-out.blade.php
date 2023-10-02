@@ -182,6 +182,13 @@
 
 
     </div>
+    <x-primary-button class="mt-5" wire:click='delDataScanLogtoMachine()' wire:loading.remove>
+        {{ 'DevieInfo' }}
+    </x-primary-button>
+
+    <div wire:loading wire:target="delDataScanLogtoMachine">
+        <x-loading />
+    </div>
 
     {{-- Canvas 
     Main BgColor / 

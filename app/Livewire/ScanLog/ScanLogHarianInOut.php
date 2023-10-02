@@ -178,7 +178,7 @@ class ScanLogHarianInOut extends Component
         DB::table('tb_scanlog')->delete();
 
         // 5. hapus data mesin
-        $this->delDataScanLogtoMachine();
+        // $this->delDataScanLogtoMachine();
     }
 
     // scanLogProses
