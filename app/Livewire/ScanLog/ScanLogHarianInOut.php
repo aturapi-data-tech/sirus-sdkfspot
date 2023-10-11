@@ -181,6 +181,81 @@ class ScanLogHarianInOut extends Component
         // $this->delDataScanLogtoMachine();
     }
 
+    public function scanLogProsesNew()
+    {
+
+        // 1. Get data from machine
+        $DataScanLog = $this->getDataScanLogtoMachineNew();
+
+        // 2. Insert data tp tb_scanlog
+        if (isset($DataScanLog['response'])) {
+            foreach ($DataScanLog['response'] as $item) {
+                DB::table('tb_scanlog')
+                    ->insert([
+                        'sn' => $item['SN'],
+                        'scan_date' => $item['ScanDate'],
+                        'pin' => trim($item['PIN'], ' '),
+                        'verifymode' => $item['VerifyMode'],
+                        'iomode' =>  $item['IOMode'],
+                        'workcode' =>  $item['WorkCode'],
+                    ]);
+            }
+        }
+
+        // 3. Loop tb_scanlog memindahkan data ke -> (abtxn_attendancexts) 
+        // --XXX celah ada pada scan_date bisa jadi ketika alat lebih dari 1 ada scan_date yang sama 
+        // dan data tidak terdeteksi   
+        DB::table('tb_scanlog')->select('sn', 'scan_date', 'pin', 'verifymode', 'iomode', 'workcode')
+            ->whereNotIn('scan_date', function ($q) {
+                $q->select('at_date')->from('abtxn_attendancexts');
+            })
+            ->get()
+            ->each(
+                function ($item) {
+
+                    // dd($item);
+                    //cek record oracle RS // if exist update else insert
+                    $cekrec = DB::table('abtxn_attendancexts')
+                        ->where('at_date', $item->scan_date)
+                        ->where('emp_id', $item->pin)
+                        ->where('at_mode', $item->iomode)
+                        ->first();
+
+                    if ($cekrec) {
+                        // update
+                        DB::table('abtxn_attendancexts')
+                            ->where('at_date', $item->scan_date)
+                            ->where('emp_id', $item->pin)
+                            ->where('at_mode', $item->iomode)
+                            ->update([
+                                'at_hour' => Carbon::createFromFormat('Y-m-d H:i:s', $item->scan_date)->format('H:i:s'),
+                                'at_date' => Carbon::createFromFormat('Y-m-d H:i:s', $item->scan_date)->format('Y-m-d H:i:s'),
+                                'at_mode' => $item->iomode,
+                                'emp_id' => $item->pin,
+                                'at_month' => Carbon::createFromFormat('Y-m-d H:i:s', $item->scan_date)->format('m'),
+                                'at_year' => Carbon::createFromFormat('Y-m-d H:i:s', $item->scan_date)->format('Y'),
+                            ]);
+                    } else {
+                        // insert
+                        DB::table('abtxn_attendancexts')
+                            ->insert([
+                                'at_hour' => Carbon::createFromFormat('Y-m-d H:i:s', $item->scan_date)->format('H:i:s'),
+                                'at_date' => Carbon::createFromFormat('Y-m-d H:i:s', $item->scan_date)->format('Y-m-d H:i:s'),
+                                'at_mode' => $item->iomode,
+                                'emp_id' => $item->pin,
+                                'at_month' => Carbon::createFromFormat('Y-m-d H:i:s', $item->scan_date)->format('m'),
+                                'at_year' => Carbon::createFromFormat('Y-m-d H:i:s', $item->scan_date)->format('Y'),
+                            ]);
+                    }
+                }
+            );
+
+        // 4. hapus data tb_scanlog
+        DB::table('tb_scanlog')->delete();
+
+        // 5. hapus data mesin
+        // $this->delDataScanLogtoMachine();
+    }
     // scanLogProses
     public function userProses()
     {
@@ -235,6 +310,49 @@ class ScanLogHarianInOut extends Component
         try {
 
             $url = env('FSERVICE') . "/scanlog/all/paging";
+            $response = Http::asForm()
+                ->timeout(30)
+                ->post(
+                    $url,
+                    ["sn" => $r['sn']]
+                );
+
+
+            // dd($response->getBody()->getContents());
+            // decode Response dari Json ke array
+            $myResponse = json_decode($response->getBody()->getContents(), true);
+
+            if (isset($myResponse['Data'])) {
+                return self::sendResponse('success', $myResponse['Data'], 200, $url, $response->transferStats->getTransferTime());
+            } else {
+
+                $devInfo = [];
+                return self::sendError('FingerSpot Tidak Merespons', $devInfo, 408, $url, null);
+            }
+            /////////////////////////////////////////////////////////////////////////////
+        } catch (Exception $e) {
+            // error, msgError,Code,url,ReqtrfTime
+
+            return self::sendError($e->getMessage(), $validator->errors(), 408, $url, null);
+        }
+    }
+
+    private function getDataScanLogtoMachineNew()
+    {
+        $r = ["sn" =>  env('FSERVICE_SN')];
+        $rules = ["sn" => "required"];
+        $validator = Validator::make($r, $rules);
+
+        if ($validator->fails()) {
+            // error, msgError,Code,url,ReqtrfTime
+            return self::sendError($validator->errors()->first(), $validator->errors(), 201, null, null);
+        }
+
+
+        // handler when time out and off line mode
+        try {
+
+            $url = env('FSERVICE') . "/scanlog/new";
             $response = Http::asForm()
                 ->timeout(30)
                 ->post(

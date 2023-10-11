@@ -65,8 +65,8 @@
                 </div>
                 {{-- Shift --}}
 
-                <x-primary-button class="ml-2" wire:click='scanLogProses()' wire:loading.remove>
-                    {{ 'ScanLog' }}
+                <x-primary-button class="ml-2" wire:click='scanLogProsesNew()' wire:loading.remove>
+                    {{ 'ScanLogNew' }}
                 </x-primary-button>
 
                 <div wire:loading wire:target="scanLogProses">
