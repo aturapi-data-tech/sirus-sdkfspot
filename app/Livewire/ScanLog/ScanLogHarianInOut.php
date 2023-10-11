@@ -380,7 +380,7 @@ class ScanLogHarianInOut extends Component
         }
     }
 
-    private function delDataScanLogtoMachine()
+    public function delDataScanLogtoMachine()
     {
         $r = ["sn" =>  env('FSERVICE_SN')];
         $rules = ["sn" => "required"];
